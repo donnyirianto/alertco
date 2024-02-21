@@ -17,7 +17,7 @@ export default (fastify, opts, done) => {
         return reply
     })
     fastify.post('/reg4', async (req,reply) => {
-        const resp = await getData(fastify,req,'RE03',"VOICE_URGENT_REG4.mp3") 
+        const resp = await getData(fastify,req,'RE04',"VOICE_URGENT_REG4.mp3") 
         reply.code(resp.code).send(resp)
         return reply
     }) 

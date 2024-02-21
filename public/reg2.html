@@ -24,6 +24,7 @@
 
         await client.subscribe("start-urgent-reg2")
         await client.subscribe("start-user-reg2")
+        await client.subscribe("start-inprogress-reg2")
 
         client.on("message", async function (topic, payload) {
             switch (topic) {
@@ -40,6 +41,21 @@
                     source.buffer = yodelBuffer;
                     source.connect(context.destination);
                     source.start();
+
+                    break;
+                case "start-inprogress-reg2":
+                    let yodelBufferInprogress;
+                    const context_inprogress = new AudioContext();
+                    await fetch('http://192.168.131.71:8000/mp3/inprogress/reg2')
+                    .then(response => response.arrayBuffer())
+                    .then(arrayBuffer => context_inprogress.decodeAudioData(arrayBuffer))
+                    .then(audioBuffer => {
+                        yodelBufferInprogress = audioBuffer;
+                    });
+                    const source_inprogress = context_inprogress.createBufferSource();
+                    source_inprogress.buffer = yodelBufferInprogress;
+                    source_inprogress.connect(context_inprogress.destination);
+                    source_inprogress.start();
 
                     break;
                 case "start-user-reg2":
