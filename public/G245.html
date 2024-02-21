@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> 
+    <script src="http://192.168.131.71:8000/public/mqtt.min.js"></script>
+    <script src="http://192.168.131.71:8000/public/jquery.min.js"></script>
+    <title>Monitoring CO - EDP CABANG</title>
+    <style>
+        html, body, iframe { height:100%; width:100%; margin:0; border:0; display:block }
+       </style>
+</head>
+
+<body>
+    <iframe src="http://192.168.131.71:3000/login" width="100%" height="800"></iframe>      
+</body>
+
+<script type="text/javascript">
+    async function MQTTconnect() {
+        var client = mqtt.connect('ws://172.24.16.131:8000/mqtt',{
+            keepalive: 0,
+            clientId: `network_monitoring_g245_${Math.random().toString(16).substring(2, 10)}`,
+        })
+
+        await client.subscribe("start-urgent-g245")
+        await client.subscribe("start-user-g245")
+
+        client.on("message", async function (topic, payload) {
+            
+            switch (topic) {
+                case "start-urgent-g245":
+                    let yodelBuffer;
+                    const context = new AudioContext();
+                    await fetch('http://192.168.131.71:8000/mp3/urgent/g245')
+                    .then(response => response.arrayBuffer())
+                    .then(arrayBuffer => context.decodeAudioData(arrayBuffer))
+                    .then(audioBuffer => {
+                        yodelBuffer = audioBuffer;
+                    });
+                    const source = context.createBufferSource();
+                    source.buffer = yodelBuffer;
+                    source.connect(context.destination);
+                    source.start();
+
+                    break;
+                case "start-user-g245":
+                    let yodelBufferUser;
+                    const context_user = new AudioContext();
+                    await fetch('http://192.168.131.71:8000/mp3/user/g245')
+                    .then(response => response.arrayBuffer())
+                    .then(arrayBuffer => context_user.decodeAudioData(arrayBuffer))
+                    .then(audioBuffer => {
+                        yodelBufferUser = audioBuffer;
+                    });
+                    const source_user = context_user.createBufferSource();
+                    source_user.buffer = yodelBufferUser;
+                    source_user.connect(context_user.destination);
+                    source_user.start();
+
+                    break;
+            
+                default:
+                    break;
+            }
+                
+        })
+    };
+
+    $(document).ready(function() {
+        MQTTconnect();
+    });
+</script>
+ 
+ 
+</html>
+ 
