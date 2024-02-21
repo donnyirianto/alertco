@@ -5,7 +5,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export const getData =  async(fastify,req,filename)=>{
+export const getData =  async(fastify,req,region,filename)=>{
     try { 
         
         const { alerts } = req.body
