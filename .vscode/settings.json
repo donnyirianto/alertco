@@ -1,9 +1,13 @@
 {
+    "dotenv.enableAutocloaking": false,
+    "editor.formatOnSave": true,
+    "prettier.singleQuote": false,
+    "prettier.printWidth": 120,
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
-    "eslint.validate": [
-        "javascript"
-    ],
-    "dotenv.enableAutocloaking": false
+    "eslint.validate": ["javascript"],
 }
