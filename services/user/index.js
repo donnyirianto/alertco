@@ -1,15 +1,14 @@
 import gTTS from "gtts";
-import path from 'path';
+import path from "path";
 
 function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export const getData =  async(fastify,req,region,filename)=>{
-    try { 
-       
-        const conn = fastify.mysql
-        const [data] = await conn.query(`SELECT group_concat(SUBSTRING_INDEX(Nama, '-', 1)) as Nama,count(*) as total
+export const getData = async (fastify, req, region, filename) => {
+  try {
+    const conn = fastify.mysql;
+    const [data] = await conn.query(`SELECT group_concat(SUBSTRING_INDEX(Nama, '-', 1)) as Nama,count(*) as total
                                         from (
                                         select
                                         nama
@@ -65,59 +64,54 @@ export const getData =  async(fastify,req,region,filename)=>{
                                         ) a
                                         where
                                         Total_Inprogress = 0
-                                        having
-                                        if(
-                                            hour(now()) >= 6,
-                                            (
-                                            if(
-                                                hour(now()) >= 14,
-                                                nama rlike 'Shift 2',
-                                                nama rlike 'Shift 1'
-                                            )
-                                            ),
-                                            nama rlike 'Shift 3'
+                                        HAVING Nama RLIKE (
+										    CASE 
+										        WHEN HOUR(NOW()) BETWEEN 6 AND 14 THEN 'Shift 1'
+										        WHEN HOUR(NOW()) BETWEEN 15 AND 22 THEN 'Shift 2'
+										        ELSE 'Shift 3'
+										    end
                                         )
                                         order by
                                         Pengerjaan_terakhir asc
                                         ) a`);
-        
-        if(data[0].total === 0) return {code: 200, message: "Tidak Ada Data"}
 
-        const textSuara = `Perhatian... Perhatian... Kepada ${data[0].Nama}, Anda tercatat sedang tidak mengerjakan komplen lebih dari 10 menit, Apakah ada kendala? Jika Tidak, Segera Ambil Komplen Onlain kembali`
-        const outputPath = path.join(process.cwd(), 'public', filename);
+    if (data[0].total === 0) return { code: 200, message: "Tidak Ada Data" };
 
-        var gtts = new gTTS(textSuara, 'id');
-        gtts.save(outputPath, function (err, result) {
-          if(err) { throw new Error(err) }
-          console.log(`Success! Open file ${outputPath} to hear result.`);
-        });
-        
-        await sleep(3000)
+    const textSuara = `Perhatian... Perhatian... Kepada ${data[0].Nama}, Anda tercatat sedang tidak mengerjakan komplen lebih dari 10 menit, Apakah ada kendala? Jika Tidak, Segera Ambil Komplen Onlain kembali`;
+    const outputPath = path.join(process.cwd(), "public", filename);
 
-        fastify.mqttClient.publish(`start-user-${region.toLowerCase().replace(/0/g, 'g')}`,"1", (err) => {
-            if (err) {
-                console.error('Error publishing message:', err);
-                return { 
-                    code: 500,
-                    message: err
-                } 
-            } else {
-              console.log(`Published message 1 to topic "start-user-${region.toLowerCase().replace(/0/g, 'g')}"`);
-            }
-        });
-        return { 
-            code: 200,
-            message: "Sukses",
-            data: textSuara
-        } 
+    var gtts = new gTTS(textSuara, "id");
+    gtts.save(outputPath, function (err, result) {
+      if (err) {
+        throw new Error(err);
+      }
+      console.log(`Success! Open file ${outputPath} to hear result.`);
+    });
 
-    } catch (error) {
-        fastify.log.error(error, "Error Service (/services/user/index.js)")
-        return { 
-            code: 500,
-            message: "Internal Server Error",
-            error: error.message
-        }
-    }    
-    
-}
+    await sleep(3000);
+
+    fastify.mqttClient.publish(`start-user-${region.toLowerCase().replace(/0/g, "g")}`, "1", (err) => {
+      if (err) {
+        console.error("Error publishing message:", err);
+        return {
+          code: 500,
+          message: err,
+        };
+      } else {
+        console.log(`Published message 1 to topic "start-user-${region.toLowerCase().replace(/0/g, "g")}"`);
+      }
+    });
+    return {
+      code: 200,
+      message: "Sukses",
+      data: textSuara,
+    };
+  } catch (error) {
+    fastify.log.error(error, "Error Service (/services/user/index.js)");
+    return {
+      code: 500,
+      message: "Internal Server Error",
+      error: error.message,
+    };
+  }
+};
