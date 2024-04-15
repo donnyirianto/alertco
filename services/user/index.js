@@ -42,6 +42,7 @@ export const getData = async (fastify, req, region, filename) => {
                                             where
                                             Kode_Lokasi_Tujuan = '${region}'
                                             and date(Tanggal_Buat) = curdate()
+                                            and bagian_tujuan ='EDP Region'
                                             and diambil_oleh != ''
                                             and diambil_oleh in(
                                                 select

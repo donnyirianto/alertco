@@ -15,6 +15,7 @@ export const getData = async (fastify, req, region, filename) => {
         Kode_Lokasi_Tujuan ='${region}'
         and (Deskripsi rlike 'pesan|klik|apka|grab|istore|dms|sales|kasir|jual|absen|kasir|jual|pos|posmain' or masalah rlike'KLIK')
         and Status_Komplain rlike 'OPEN'
+        and bagian_tujuan ='EDP Region' 
         order by Total_CO`);
 
     if (alerts[0].Total_CO === 0) return { code: 200, message: "Tidak Ada Data" };
