@@ -13,14 +13,14 @@ export const getData = async (fastify, req, region, filename) => {
         where 
         Kode_Lokasi_Tujuan ='${region}'
         and Status_Komplain rlike 'INPROGRESS'
-        and TIMESTAMPDIFF(MINUTE, Tanggal_Ambil, NOW()) > 20
+        and TIMESTAMPDIFF(MINUTE, Tanggal_Ambil, NOW()) > 10
         and Tipe_Lokasi_Asal ='store'
         and bagian_tujuan ='EDP Region'
         and Tujuan_Relasi_Komplain =''`);
 
     if (data[0].total === 0) return { code: 200, message: "Tidak Ada Data" };
 
-    const textSuara = `Perhatian... Perhatian... Kepada ${data[0].Nama}, Anda tercatat sedang mengerjakan komplen lebih dari 20 menit dan belum diselesaikan, Apakah ada kendala dalam pengerjaan?`;
+    const textSuara = `Perhatian... Perhatian... Kepada ${data[0].Nama}, Anda tercatat sedang mengerjakan komplen lebih dari 10 menit dan belum diselesaikan, Apakah ada kendala dalam pengerjaan?`;
     const outputPath = path.join(process.cwd(), "public", filename);
 
     var gtts = new gTTS(textSuara, "id");
