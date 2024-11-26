@@ -16,6 +16,7 @@ export const getData = async (fastify, req, region, filename) => {
         and TIMESTAMPDIFF(MINUTE, Tanggal_Ambil, NOW()) > 10
         and Tipe_Lokasi_Asal ='store'
         and bagian_tujuan ='EDP Region'
+        and date(tanggal_buat) = curdate()
         and Tujuan_Relasi_Komplain =''`);
 
     if (data[0].total === 0) return { code: 200, message: "Tidak Ada Data" };
